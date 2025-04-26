@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= username %>'s LeetCode Card</title>
+</head>
+<body>
+  <h2><%= name %> (@<%= username %>)</h2>
+  <img src="<%= avatar %>" alt="Avatar" width="100" />
+  <p>Ranking: <%= ranking %></p>
+  <p>Reputation: <%= reputation %></p>
+  <p>Contribution Points: <%= points %></p>
+
+  <h3>Questions Solved:</h3>
+  <ul>
+    <% stats.forEach(stat => { %>
+      <li><%= stat.difficulty %>: <%= stat.count %></li>
+    <% }); %>
+  </ul>
+
+  <a href="/">← Try another</a>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>

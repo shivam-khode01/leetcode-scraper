@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LeetCode Profile</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Tailwind CDN (for Dark/Light toggle) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Profile card hover glow */
+    .profile-container {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease, box-shadow 0.4s ease;
+      border-radius: 20px;
+    }
+    .profile-container.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .profile-container.loaded:hover {
+      box-shadow: 0 0 30px rgba(0, 115, 230, 0.5), 0 0 40px rgba(0, 115, 230, 0.3);
+      transform: translateY(-5px);
+    }
+
+    /* Glow behind chart */
+    .chart-glow {
+      position: relative;
+      display: inline-block;
+    }
+    .chart-glow::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(0, 123, 255, 0.3) 0%, rgba(0, 123, 255, 0) 70%);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      z-index: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.4; }
+    }
+
+    /* Chart size */
+    #solvedChart {
+      width: 250px !important;
+      height: 250px !important;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Flash message */
+    .flash-message {
+      display: none;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      width: auto;
+    }
+
+    /* Layout */
+    .profile-details, .stats-table {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .profile-details div, .stats-table div {
+      width: 45%;
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Buttons */
+    .back-button {
+      font-size: 20px;
+      padding: 12px 24px;
+      background-color: #0073e6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .back-button:hover {
+      background-color: #005bb5;
+    }
+
+    /* Profile image */
+    .profile-image {
+      border-radius: 50%;
+    }
+
+    /* Loader */
+    #loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 8px solid #e29b03;
+      border-top: 8px solid #e68200;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .profile-details, .stats-table {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .profile-details div, .stats-table div {
+        width: 100%;
+      }
+      #solvedChart {
+        width: 200px !important;
+        height: 200px !important;
+      }
+    }
+
+    /* Bold & Larger Text */
+    h1 {
+      font-weight: bold;
+      font-size: 32px;
+    }
+
+    h3, h4 {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body class="bg-white text-black min-h-screen transition-colors duration-300" id="page">
+
+  <div id="loader"></div> <!-- Spinner -->
+
+  <div class="container" id="content" style="display: none;">
+    <div class="profile-container card shadow-lg p-4">
+
+      <% if (error) { %>
+      <div class="alert alert-danger flash-message" id="flashMessage">
+        <%= error %>
+      </div>
+      <% } %>
+      <% if (success) { %>
+      <div class="alert alert-success flash-message" id="flashMessage">
+        <%= success %>
+      </div>
+      <% } %>
+
+      <h1 class="text-center mb-4 leet-code-theme"><b>LeetCode Profile for <%= username %></b></h1>
+
+      <div class="profile-details">
+        <div>
+          <img src="<%= avatar %>" alt="User Avatar" class="profile-image mb-3" width="120">
+          <h3><b><%= name %></b></h3>
+          <p><strong>Ranking:</strong> <%= ranking %></p>
+          <p><strong>Reputation:</strong> <%= reputation %></p>
+          <p><strong>Location:</strong> <%= location.split('%').join(', ') %></p>
+        </div>
+
+        <div>
+          <h4><b>Problem Solving Stats</b></h4>
+          <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th>Difficulty</th>
+                <th>Problems Solved</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% stats.forEach(stat => { %>
+              <tr>
+                <td><%= stat.difficulty %></td>
+                <td><%= stat.count %></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="d-flex justify-content-center mb-4 chart-glow">
+        <canvas id="solvedChart"></canvas>
+      </div>
+
+      <div class="text-center mt-4">
+        <button class="btn btn-primary me-2" onclick="downloadCardAsImage()">Download as Image</button>
+        <button class="btn btn-success" onclick="downloadCardAsPDF()">Download as PDF</button>
+      </div>
+
+      <div class="text-center mt-4">
+        <button class="back-button" onclick="history.back()">Back</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- html2canvas & jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Scripts -->
+  <script>
+    // Chart
+    const ctx = document.getElementById('solvedChart').getContext('2d');
+    const solvedChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Easy', 'Medium', 'Hard'],
+        datasets: [{
+          label: 'Problems Solved',
+          data: [<%= stats[0].count %>, <%= stats[1].count %>, <%= stats[2].count %>],
+          backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+          borderColor: '#fff',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: { enabled: true }
+        }
+      }
+    });
+
+    // Loader and show content
+    window.onload = () => {
+      document.getElementById('loader').style.display = 'none';
+      const content = document.getElementById('content');
+      content.style.display = 'flex';
+      document.querySelector('.profile-container').classList.add('loaded');
+    };
+
+    // Download as Image with improved quality and avatar, excluding buttons and back button
+    function downloadCardAsImage() {
+      const card = document.querySelector('.profile-container');
+      const buttons = document.querySelectorAll('.btn'); // Select buttons
+      const backButton = document.querySelector('.back-button'); // Select the back button
+
+      // Temporarily hide buttons and back button before capturing
+      buttons.forEach(button => button.style.display = 'none');
+      if (backButton) backButton.style.display = 'none';
+
+      // Increase scale for better resolution and ensure images are included
+      html2canvas(card, {
+        scale: 3,  // Adjust for better resolution
+        useCORS: true  // Ensure CORS-enabled images are captured
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'profile.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        // Restore the buttons and back button after the download
+        buttons.forEach(button => button.style.display = '');
+        if (backButton) backButton.style.display = '';
+      });
+    }
+
+    // Download as PDF with improved quality and avatar, excluding buttons and back button
+    function downloadCardAsPDF() {
+      const card = document.querySelector('.profile-container');
+      const buttons = document.querySelectorAll('.btn'); // Select buttons
+      const backButton = document.querySelector('.back-button'); // Select the back button
+
+      // Temporarily hide buttons and back button before capturing
+      buttons.forEach(button => button.style.display = 'none');
+      if (backButton) backButton.style.display = 'none';
+
+      // Increase scale for better resolution and ensure images are included
+      html2canvas(card, {
+        scale: 3,  // Adjust for better resolution
+        useCORS: true  // Ensure CORS-enabled images are captured
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        // Ensure the image fits the page without distortion
+        const imgWidth = 190;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save('profile.pdf');
+
+        // Restore the buttons and back button after the download
+        buttons.forEach(button => button.style.display = '');
+        if (backButton) backButton.style.display = '';
+      });
+    }
+  </script>
+
+</body>
+
+</html>
