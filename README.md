@@ -1,4 +1,4 @@
-# LeetCode Profile Viewer
+# LeetCode Scraper :  Profile Viewer 
 
 A web application that allows users to view and download their LeetCode profile information, including stats, avatar, and problem-solving details. It provides visual representations of your progress with downloadable images and PDFs for easy sharing and tracking.
 
@@ -31,7 +31,8 @@ git clone https://github.com/your-username/leetcode-profile-viewer.git
 Navigate to the project folder and install the required dependencies:
 
 ```bash
-npm install
+npm install express html2canvas jspdf chart.js bootstrap tailwindcss
+
 ```
 3. Run the application
 After installing the dependencies, you can start the application:
